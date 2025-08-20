@@ -171,12 +171,32 @@ module.exports = class UserController {
             res.status(422).json({message: 'O telefone eh obrigatorio' })
             return
         }
-        if(!password) {
-            res.status(422).json({message: 'A senha eh obrigatorio' })
+
+        user.phone = phone
+
+        if(password != confirmpassword) {
+            res.status(422).json({message: 'As senhas nao conferem' })
             return
+        } else if(password == confirmpassword && password != null) {
+
+            //create password
+        const salt = await bcrypt.genSalt(12)
+        const passwordHash = await bcrypt.hash(password, salt)
+
+        user.password = passwordHash
         }
-        if(!confirmpassword) {
-            res.status(422).json({message: 'A confirmacao da senha eh obrigatorio' })
+        
+        try {
+            await User.findOneAndUpdate(
+                {_id: user._id},
+                {$set: user},
+                {new: true}
+            )
+            res.status(200).json({
+                message: 'Usuario atualizado com sucesso!'
+            })
+        } catch (error) {
+            res.status(500).json({ message: err })
             return
         }
     }
