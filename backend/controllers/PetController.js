@@ -128,7 +128,6 @@ module.exports = class PetController {
     }
 
     static async removePetById(req, res) {
-
         const id = req.params.id
         //check if id is valid
         if (!ObjectId.isValid(id)) {
@@ -140,6 +139,7 @@ module.exports = class PetController {
 
         if(!pet) {
             res.status(404).json({message: 'Pet nao encontrado!'})
+            return
         }
 
         //check if logged in user registered pet
@@ -148,10 +148,75 @@ module.exports = class PetController {
 
         if(pet.user._id.toString() !== user._id.toString()) {
             res.status(422).json({message: 'Houve um problema em processar a solicitacao!'})
+            return
         }
-
         await Pet.findByIdAndDelete(id)
 
         res.status(200).json({message: 'Pet removido com sucesso'})
     }
+
+    static async updatePet(req, res) {
+        const id = req.params.id
+
+        const { name, age, weight, color, available } = req.body  || {};
+        const images = req.files
+        
+        const updatedData = {}
+
+        //check if pet exists
+        const pet = await Pet.findOne({ _id: id })
+
+        if(!pet) {
+            res.status(404).json({message: 'Pet nao encontrado!'})
+            return
+        }
+        //check if logged in user registered pet
+        const token = getToken(req)
+        const user = await getUserByToken(token)
+
+        if(pet.user._id.toString() !== user._id.toString()) {
+            res.status(422).json({message: 'Houve um problema em processar a solicitacao!'})
+            return
+        }
+
+        //validations
+        if(!name) {
+            res.status(422).json({message: 'O nome eh obrigatorio!'})
+            return
+        } else {
+            updatedData.name = name
+        }
+        if(!age) {
+            res.status(422).json({message: 'A idade eh obrigatoria!'})
+            return
+        } else {
+            updatedData.age = age
+        }
+        if(!weight) {
+            res.status(422).json({message: 'O peso eh obrigatorio!'})
+            return
+        } else {
+            updatedData.weight = weight
+        }
+        if(!color) {
+            res.status(422).json({message: 'A cor eh obrigatoria!'})
+            return
+        } else {
+            updatedData.color = color
+        }
+        if(images.length === 0) {
+            res.status(422).json({message: 'A imagem eh obrigatoria!'})
+            return
+        } else {
+            updatedData.images = []
+            images.map((image) => {
+                updatedData.images.push(image.filename)
+            })
+        }
+
+        await Pet.findByIdAndUpdate(id, updatedData)
+
+        res.status(200).json({message: 'Pet Atualizado com sucesso'})
+    }
+
 }
