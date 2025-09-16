@@ -219,4 +219,74 @@ module.exports = class PetController {
         res.status(200).json({message: 'Pet Atualizado com sucesso'})
     }
 
+    static async schedule(req, res) {
+        const id = req.params.id
+        
+        //check if pet exists
+        const pet = await Pet.findOne({ _id: id })
+
+        if (!pet) {
+            res.status(404).json({ message: 'Pet nao encontrado! '})
+            return
+        }
+
+        //check if user registered pet
+        const token = getToken(req)
+        const user = await getUserByToken(token)
+
+        if(pet.user._id.equals(user._id)) {
+            res.status(422).json({message: 'Voce nao pode agendar uma visita com o proprio pet!'})
+            return
+        }
+
+        //check if user already schedule a visit
+        if(pet.adopter) {
+            if(pet.adopter._id.equals(user.id)) {
+                res.status(422).json({message: 'Voce ja agendou uma visita para este pet!'})
+                return
+            }
+        }
+
+        //add user to pet
+        pet.adopter = {
+            _id: user._id,
+            name: user.name,
+            image: user.image
+        }
+
+        await Pet.findByIdAndUpdate(id, pet)
+
+        res.status(200).json({ message: `A visita foi agendada com sucesso, entre em contato com ${pet.user.name} pelo telefone ${pet.user.phone}`
+        })
+    }
+
+    static async concludeAdoption(req, res) {
+
+        const id =  req.params.id
+
+        //check if pet exists
+        const pet = await Pet.findOne({ _id: id })
+
+        if (!pet) {
+            res.status(404).json({ message: 'Pet nao encontrado! '})
+            return
+        }
+
+        //check if logged in user registered pet
+        const token = getToken(req)
+        const user = await getUserByToken(token)
+
+        if(pet.user._id.toString() !== user._id.toString()) {
+            res.status(422).json({message: 'Houve um problema em processar a solicitacao!'})
+            return
+        }
+
+        pet.available = false
+
+        await Pet.findByIdAndUpdate(id, pet)
+
+        res.status(200).json({ message: 'Parabens o ciclo de adocao foi um sucesso'})
+
+    }
+
 }
