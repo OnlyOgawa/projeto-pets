@@ -10,7 +10,7 @@
     background-color: #ffd400;
     color: #fff;
     border: none;
-    min-width: 100px;
+    min-width: 200px;
     min-height: 2.5em;
     width: 100%;
     cursor: pointer;
@@ -29,4 +29,17 @@
 .form_container p a {
     color: #16479d;
     font-weight: bold;
+}
+
+/* form de pets */
+.preview_pet_images {
+    display: flex;
+    justify-content: center;
+    margin: 1em;
+}
+
+.preview_pet_images img {
+    width: 200px;
+    height: 200px;
+    margin-left: 1em;
 }
