@@ -100,7 +100,6 @@ module.exports = class UserController {
     }
 
     static async checkUser(req, res) {
-
         let currentUser
 
         if(req.headers.authorization) {
