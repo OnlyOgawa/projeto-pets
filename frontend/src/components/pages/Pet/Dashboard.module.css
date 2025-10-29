@@ -48,8 +48,9 @@
     min-width: 100px;
 }
 
-.action {
+.actions {
     margin-left: auto;
+    text-align: right;
 }
 
 .actions a,
@@ -81,4 +82,13 @@
 .action .conclude_btn:hover {
     color: #fff;
     background-color: #ffd400;
+}
+
+/* my adoptions */
+.contacts {
+    margin-left: 2em;
+}
+
+.contacts p {
+    margin-bottom: 0.5em;
 }
